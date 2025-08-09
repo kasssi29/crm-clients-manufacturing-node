@@ -1,0 +1,46 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-lock.yaml
+
+# Environment files (секреты)
+.env
+.env.*.local
+.env.local
+
+# Logs
+logs
+*.log
+logs/*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Build / dist
+dist/
+build/
+.cache/
+
+# Coverage
+coverage/
+*.lcov
+
+# MongoDB dumps
+dump/
+
+# Optional: local database files
+*.db
+*.sqlite

@@ -1,0 +1,616 @@
+{
+  "info": {
+    "_postman_id": "198ef0d7-5c38-4a98-8341-96246538651b",
+    "name": "CRM API (Users • Auth • Clients • Stats) — FIXED for current schema",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "chatgpt"
+  },
+  "item": [
+    {
+      "name": "README (How to use this collection)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/healthz",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "healthz"
+          ]
+        },
+        "description": "Quick start:\n1) Set {{baseUrl}} to your API root (default http://localhost:3000/api).\n2) Use Auth → Register or Login to populate {{token}} automatically.\n3) Set {{managerId}} to a real manager user's ID (for supervisor actions).\n4) Run Clients → Create Client to store {{clientId}} and {{equipmentId}} from the response.\n5) Users/Stats/Clients requests are role-gated. Ensure your JWT has the proper role.\n\nThis version matches Client schema fields: contactEmail, contactPhone, clientContactPerson, no address field.\n"
+      },
+      "response": []
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (POST /auth/register)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates a user and returns a JWT in `token`. Update the payload as needed.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"AdminPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json={}; try{json=pm.response.json();}catch(e){}",
+                  "if(json && json.token){ pm.collectionVariables.set('token', json.token);}",
+                  "if(json && json.user && json.user.role==='admin'){ pm.collectionVariables.set('adminId', json.user.id || json.user._id || ''); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (POST /auth/login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in and stores JWT in {{token}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"AdminPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json={}; try{json=pm.response.json();}catch(e){}",
+                  "if(json && json.token){ pm.collectionVariables.set('token', json.token);}"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Register and login to obtain a JWT. Stores {{token}}."
+    },
+    {
+      "name": "Users (admin)",
+      "item": [
+        {
+          "name": "Get All Users (GET /users)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Admin only. Returns all users without passwords."
+          },
+          "response": []
+        },
+        {
+          "name": "My Profile (GET /users/profile)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            },
+            "description": "Authenticated user. Returns your profile (no password)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Role (PATCH /users/:id/role)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{managerId}}/role",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{managerId}}",
+                "role"
+              ]
+            },
+            "description": "Admin only. Updates a user's role. Uses {{managerId}} as target.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"manager\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Admin-only and authenticated user endpoints under /api/users."
+    },
+    {
+      "name": "Stats (supervisor)",
+      "item": [
+        {
+          "name": "Total Clients (GET /stats/total-clients)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats/total-clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stats",
+                "total-clients"
+              ]
+            },
+            "description": "Supervisor only. Returns { total }."
+          },
+          "response": []
+        },
+        {
+          "name": "Expiring This Month (GET /stats/expiring)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats/expiring",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stats",
+                "expiring"
+              ]
+            },
+            "description": "Supervisor only. Returns { expiringThisMonth, notifiedThisMonth }."
+          },
+          "response": []
+        },
+        {
+          "name": "Total Managers (GET /stats/total-managers)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats/total-managers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stats",
+                "total-managers"
+              ]
+            },
+            "description": "Supervisor only. Returns { totalManagers }."
+          },
+          "response": []
+        },
+        {
+          "name": "Clients Summary per Manager (GET /stats/clients-summary-per-manager)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats/clients-summary-per-manager",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stats",
+                "clients-summary-per-manager"
+              ]
+            },
+            "description": "Supervisor only. Array of manager summaries."
+          },
+          "response": []
+        },
+        {
+          "name": "Manager Details (GET /stats/manager/:id/details)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stats/manager/{{managerId}}/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stats",
+                "manager",
+                "{{managerId}}",
+                "details"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2025-07-01T00:00:00.000Z"
+                },
+                {
+                  "key": "to",
+                  "value": "2025-08-31T23:59:59.999Z"
+                }
+              ]
+            },
+            "description": "Supervisor only. Query params `from` and `to` optional."
+          },
+          "response": []
+        }
+      ],
+      "description": "Supervisor-only stats endpoints under /api/stats."
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "List Clients (GET /clients)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "description": "Supervisor: all clients. Manager: only their clients."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Client (POST /clients)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            },
+            "description": "Manager or Supervisor. Supervisors must provide managerId. Uses contactEmail/contactPhone.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Acme Ltd\",\n  \"clientContactPerson\": \"John Doe\",\n  \"contactEmail\": \"john@acme.example\",\n  \"contactPhone\": \"+353111000001\",\n  \"isActive\": true,\n  \"managerId\": \"{{managerId}}\",\n  \"equipment\": [\n    {\n      \"model\": \"Caterpillar Pump CP-01\",\n      \"serial\": \"SN-123456\",\n      \"purchaseDate\": \"2024-08-01T00:00:00.000Z\",\n      \"serviceStatus\": \"none\"\n    },\n    {\n      \"model\": \"Caterpillar Pump CP-02\",\n      \"serial\": \"SN-654321\",\n      \"purchaseDate\": \"2024-09-15T00:00:00.000Z\"\n    }\n  ],\n  \"notes\": \"Created from Postman example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let json={}; try{json=pm.response.json();}catch(e){}",
+                  "if(json && (json._id || json.id)){ pm.collectionVariables.set('clientId', json._id || json.id);}",
+                  "if(json && json.equipment && json.equipment.length>0){ pm.collectionVariables.set('equipmentId', json.equipment[0]._id || '');}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Soon Expiring (GET /clients/soon-expiring)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/soon-expiring",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "soon-expiring"
+              ],
+              "query": [
+                {
+                  "key": "months",
+                  "value": "3"
+                },
+                {
+                  "key": "notified",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Manager only. Query: months, notified=false filters only non-notified items."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client (PATCH /clients/:id)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}"
+              ]
+            },
+            "description": "Manager (own clients) or Supervisor. Updates any fields.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientContactPerson\": \"Jane Updated\",\n  \"contactEmail\": \"jane.updated@acme.example\",\n  \"contactPhone\": \"+353111000009\",\n  \"isActive\": true,\n  \"notes\": \"Updated via Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Client (DELETE /clients/:id) [admin]",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}"
+              ]
+            },
+            "description": "Admin only: permanently deletes a client."
+          },
+          "response": []
+        },
+        {
+          "name": "Soft Delete (DELETE /clients/:id/soft-delete) [supervisor]",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}/soft-delete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}",
+                "soft-delete"
+              ]
+            },
+            "description": "Supervisor only: marks client as inactive."
+          },
+          "response": []
+        },
+        {
+          "name": "Reassign Client (PATCH /clients/:id/assign) [supervisor]",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}/assign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}",
+                "assign"
+              ]
+            },
+            "description": "Supervisor only: reassigns client to another manager.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newManagerId\": \"{{managerId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Client Details (GET /clients/:id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}"
+              ]
+            },
+            "description": "Supervisor & Manager: get details (with manager populated)."
+          },
+          "response": []
+        },
+        {
+          "name": "Service Action (PATCH /clients/:clientId/equipment/:equipmentId/service-action)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}/equipment/{{equipmentId}}/service-action",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}",
+                "equipment",
+                "{{equipmentId}}",
+                "service-action"
+              ]
+            },
+            "description": "Supervisor & Manager: action = notify | confirm.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"notify\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Manager/Supervisor/Admin endpoints under /api/clients."
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "adminId",
+      "value": ""
+    },
+    {
+      "key": "managerId",
+      "value": ""
+    },
+    {
+      "key": "clientId",
+      "value": ""
+    },
+    {
+      "key": "equipmentId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
+}
