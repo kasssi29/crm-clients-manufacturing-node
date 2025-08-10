@@ -228,7 +228,6 @@ You can extend this CRM to include:
 
 ## 💻 Frontend Recommendations
 For the frontend, i recommend using **React** or **Vue** to build a responsive, user-friendly interface that integrates with this API.  
-A frontend implementation for this CRM will be developed and published in the same GitHub account as this repository.
 
 ---
 
