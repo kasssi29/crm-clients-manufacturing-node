@@ -7,11 +7,6 @@ This is a **simplified version** of a CRM system I originally designed for a man
 > The full production version included additional features such as advanced reporting, automated workflows, document management, and integration with external services.  
 > This release focuses on the core backend logic for learning and demonstration purposes.
  
-The system demonstrates **role-based access control** with three roles:
-
-- **Admin** — user management and ability to hard-delete clients.
-- **Supervisor** — can view all clients, assign them to managers, and view detailed statistics.
-- **Manager** — can create and manage only their own assigned clients.
 
 This example can be used as:
 - A **starting point** for building a more complex CRM tailored to company needs.
@@ -39,6 +34,13 @@ or
 - `/healthz` endpoint for service checks
 
 ---
+## 🧾 Roles
+
+The system demonstrates **role-based access control** with three roles:
+
+- **Admin**: User managment, hard delete of client.
+- **Supervisor**: View all clients, assign clients to managers, see statistics.
+- **Manager**: Can create and manage their own clients.
 
 ## API Endpoints
 
@@ -115,15 +117,6 @@ or
       ]
     }
     ```
-
----
-
-## 🧾 Roles
-
-- **Admin**: User managment, hard delete of client.
-- **Supervisor**: View all clients, assign clients to managers, see statistics.
-- **Manager**: Can create and manage their own clients.
-
 ---
 
 ## 🌐 Deployment Environment Variables
@@ -217,13 +210,7 @@ Before running requests, set the following variables in Postman (**Environments 
 
 ### 4. Notes
 - All example credentials are **fake** (`admin@example.com`, `AdminPass123!`, etc.).
-- To test with seeded data, run:
-  ```bash
-  npm run seed
-  ```
-  before starting the app.
-- Default base URL is for local development — change it if running on a deployed server.
-
+  
 ---
 
 ## 🚀 Possible Extensions
